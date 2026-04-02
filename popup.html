@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jelly Focus</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@300;400;600&display=swap');
+  :root {
+    --bg: #0a0a14; --panel: #111122; --border: rgba(255,255,255,0.08);
+    --neon-work: #b84aff; --neon-work-glow: rgba(184,74,255,0.4);
+    --neon-rest: #00ffd5; --neon-rest-glow: rgba(0,255,213,0.4);
+    --neon-gold: #ffd700; --text: #e8e8f0; --sub: #8888aa;
+    --cur: var(--neon-work); --cur-glow: var(--neon-work-glow);
+    --rad: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); width: 320px; padding: 16px; transition: background 0.5s; }
+  h1, h2, h3 { font-family: 'Orbitron', sans-serif; }
+  
+  /* Медуза (Pure CSS) */
+  .jelly-wrap { position: relative; height: 100px; margin: 10px auto; display: flex; justify-content: center; }
+  .jelly { width: 70px; height: 60px; background: linear-gradient(180deg, var(--cur), transparent); border-radius: 50% 50% 40% 40%; position: relative; animation: swim 4s ease-in-out infinite; box-shadow: 0 0 25px var(--cur-glow); transition: all 0.5s; }
+  .jelly::before, .jelly::after { content: ''; position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; top: 20px; box-shadow: 0 0 8px #fff; }
+  .jelly::before { left: 15px; } .jelly::after { right: 15px; }
+  .jelly.rest { --cur: var(--neon-rest); --cur-glow: var(--neon-rest-glow); }
+  @keyframes swim { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-8px) scale(1.05); } }
+  .tentacles { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+  .ten { width: 3px; height: 18px; background: var(--cur); border-radius: 2px; opacity: 0.7; animation: wave 2s infinite alternate; transition: background 0.5s; }
+  .ten:nth-child(odd) { animation-delay: 0.2s; }
+  @keyframes wave { 0% { transform: skewX(-10deg); } 100% { transform: skewX(10deg); } }
+
+  /* Таймер */
+  .timer-ui { text-align: center; margin: 10px 0; }
+  .phase { font-size: 0.7rem; color: var(--cur); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; transition: color 0.5s; }
+  .time { font-family: 'Orbitron'; font-size: 3.2rem; font-weight: 700; text-shadow: 0 0 15px var(--cur-glow); transition: text-shadow 0.5s; }
+  .progress-bg { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--cur); transition: width 1s linear; box-shadow: 0 0 10px var(--cur); }
+  
+  .controls { display: flex; gap: 8px; justify-content: center; margin: 12px 0; }
+  .btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: var(--rad); cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+  .btn:hover { background: rgba(255,255,255,0.1); border-color: var(--cur); }
+  .btn.primary { background: linear-gradient(135deg, var(--cur), #ff6b9d); border: none; color: #fff; font-weight: 600; }
+  .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--cur-glow); }
+
+  /* Геймификация */
+  .xp-wrap { background: rgba(255,255,255,0.03); padding: 8px 10px; border-radius: var(--rad); margin-bottom: 12px; }
+  .xp-meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--sub); margin-bottom: 4px; }
+  .xp-bar { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; }
+  .xp-fill { height: 100%; width: 0%; background: var(--neon-gold); border-radius: 2px; transition: width 0.4s; box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+  .stats { display: flex; gap: 8px; margin-bottom: 10px; font-size: 0.75rem; }
+  .stat { background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 6px; color: var(--sub); flex: 1; text-align: center; }
+  .stat span { color: var(--neon-gold); font-weight: 600; }
+
+  /* Задачи */
+  .tasks-h { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 6px; color: var(--sub); }
+  .task-inputs { display: flex; gap: 6px; margin-bottom: 8px; }
+  .task-inputs input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 8px; border-radius: 8px; color: #fff; font-size: 0.85rem; }
+  .task-inputs input:focus { outline: none; border-color: var(--cur); }
+  .task-list { max-height: 110px; overflow-y: auto; padding-right: 2px; }
+  .task { display: flex; align-items: center; gap: 8px; padding: 6px; background: rgba(255,255,255,0.02); border-radius: 6px; margin-bottom: 4px; transition: 0.2s; font-size: 0.85rem; }
+  .task.done { opacity: 0.4; text-decoration: line-through; }
+  .task:hover { background: rgba(255,255,255,0.05); }
+  .check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; flex-shrink: 0; display: grid; place-items: transition: 0.2s; }
+  .check.ok { background: var(--cur); border-color: var(--cur); }
+  .check.ok::after { content: '✓'; font-size: 12px; color: var(--bg); }
+  .del { margin-left: auto; background: transparent; border: none; color: var(--sub); cursor: pointer; font-size: 1rem; opacity: 0.5; }
+  .del:hover { opacity: 1; color: #ff5757; }
+  .empty { text-align: center; color: var(--sub); opacity: 0.5; font-size: 0.8rem; padding: 10px; }
+  
+  /* Настройки времени */
+  .settings { display: flex; gap: 8px; justify-content: center; margin-top: 8px; font-size: 0.75rem; color: var(--sub); }
+  .s-btn { background: transparent; border: 1px solid var(--border); color: var(--text); width: 24px; height: 24px; border-radius: 4px; cursor: pointer; }
+  .s-val { min-width: 20px; text-align: center; color: var(--cur); font-family: 'Orbitron'; }
+
+  /* Level Up */
+  .lvl-up { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Orbitron'; font-size: 2rem; font-weight: 700; color: var(--neon-gold); text-shadow: 0 0 30px rgba(255,215,0,0.6); pointer-events: none; opacity: 0; z-index: 999; }
+  .lvl-up.show { animation: pop 1.2s ease-out forwards; }
+  @keyframes pop { 0% { scale: 0; opacity: 0; } 30% { scale: 1.2; opacity: 1; } 60% { scale: 1; } 100% { transform: translate(-50%, -60%); opacity: 0; } }
+</style>
+</head>
+<body>
+
+  <div class="jelly-wrap">
+    <div class="jelly" id="jelly">
+      <div class="tentacles">
+        <div class="ten"></div><div class="ten"></div><div class="ten"></div><div class="ten"></div><div class="ten"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="xp-wrap">
+    <div class="xp-meta"><span id="lvlDisp">Ур. 1</span><span id="xpDisp">0 / 100 XP</span></div>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+  </div>
+  <div class="stats">
+    <div class="stat">🔥 Серия: <span id="streak">0</span></div>
+    <div class="stat">✅ Задач: <span id="doneTasks">0</span></div>
+  </div>
+
+  <div class="timer-ui">
+    <div class="phase" id="phaseTxt">ФОКУС</div>
+    <div class="time" id="timeDisp">25:00</div>
+    <div class="progress-bg"><div class="progress-bar" id="progBar"></div></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" id="btnStart">▶ Старт</button>
+    <button class="btn" id="btnReset">↺</button>
+  </div>
+
+  <div class="tasks-h">
+    <span>📋 Задачи сессии</span>
+    <span id="taskCount">0 / 0</span>
+  </div>
+  <div class="task-inputs">
+    <input type="text" id="taskIn" placeholder="Добавить задачу...">
+    <button class="btn" id="btnAdd">+</button>
+  </div>
+  <div class="task-list" id="taskList">
+    <div class="empty">Нет задач. Добавьте первую! 🎯</div>
+  </div>
+
+  <div class="settings">
+    <span>Работа</span>
+    <button class="s-btn" onclick="adjTime('w',-1)">-</button>
+    <span class="s-val" id="wVal">25</span>
+    <button class="s-btn" onclick="adjTime('w',1)">+</button>
+    <span style="margin-left:8px">Отдых</span>
+    <button class="s-btn" onclick="adjTime('r',-1)">-</button>
+    <span class="s-val" id="rVal">5</span>
+    <button class="s-btn" onclick="adjTime('r',1)">+</button>
+  </div>
+
+  <div class="lvl-up" id="lvlAnim">⬆ LEVEL UP!</div>
+  <script src="popup.js"></script>
+</body>
+</html>
