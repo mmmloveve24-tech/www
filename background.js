@@ -1,4 +1,6 @@
 // background.js — Управление уведомлениями
+const NOTIFY_ICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y0X58QAAAAASUVORK5CYII=';
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === 'clear') {
     // Очистка всех текущих браузерных уведомлений
@@ -8,15 +10,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     // Возвращаем контроль системе (разрешаем показ новых)
     sendResponse({ status: 'allowed' });
   }
-  return true; // Keep channel open for async if needed
+  return true;
 });
 
-// Запрос permissions при первом запуске (опционально)
 chrome.runtime.onInstalled.addListener(() => {
   chrome.notifications.create('init', {
     type: 'basic',
     title: '🪼 Jelly Focus установлен!',
     message: 'Откройте всплывающее окно, чтобы начать первую сессию.',
-    iconUrl: ''
+    iconUrl: NOTIFY_ICON
   });
 });
