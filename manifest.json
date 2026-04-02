@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "🪼 Jelly Focus",
+  "version": "1.0.0",
+  "description": "Таймер концентрации с геймификацией, неоновой медузой и управлением сессиями.",
+  "permissions": [
+    "storage",
+    "notifications"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Jelly Focus"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
